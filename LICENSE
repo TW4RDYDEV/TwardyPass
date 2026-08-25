@@ -1,0 +1,51 @@
+Copyright (c) 2026 Filip Twardowski
+All rights reserved.
+
+Permission is granted to view, download, use, modify, and redistribute this software and its source code for personal, educational, research, and other non-commercial purposes, subject to the following conditions:
+
+## 1. Attribution
+
+The original copyright notice, this license, and attribution to Filip Twardowski must be preserved in all copies, forks, modified versions, and substantial portions of the software.
+
+Redistributed source code must retain visible attribution to the original author.
+
+Redistributed compiled applications or modified versions must include visible attribution to Filip Twardowski in an About, Credits, Documentation, README, or equivalent reasonably visible location.
+
+## 2. Non-Commercial Use
+
+This software may not be sold, licensed for a fee, included in a paid product, included in a paid service, commercially redistributed, commercially sublicensed, or otherwise used primarily for commercial advantage or monetary compensation without prior written permission from Filip Twardowski.
+
+Commercial licensing may be granted separately by the copyright holder.
+
+## 3. Modifications
+
+Modification of the software is permitted for non-commercial purposes.
+
+Modified versions must not remove or obscure attribution to the original author and must clearly indicate that modifications have been made when redistributed.
+
+Modified versions may not falsely claim to be the original or official version of TwardyPass.
+
+## 4. Redistribution
+
+Non-commercial redistribution is permitted provided that:
+
+* this license remains included;
+* the original copyright notice remains included;
+* attribution to Filip Twardowski remains visible;
+* the software is not sold or commercially monetized without written permission.
+
+## 5. No Trademark Rights
+
+This license does not grant permission to use the TwardyPass name, branding, logos, or other identifiers in a manner that suggests endorsement, sponsorship, or official affiliation with the original author.
+
+## 6. Commercial Licensing
+
+Anyone wishing to use TwardyPass commercially, redistribute it commercially, incorporate it into a commercial product or service, or otherwise monetize it must obtain prior written permission from Filip Twardowski.
+
+Commercial licensing requests may be made through the project owner's GitHub profile.
+
+## 7. Disclaimer
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT.
+
+IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY ARISING FROM, OUT OF, OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
