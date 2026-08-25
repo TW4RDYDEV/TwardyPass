@@ -1,4 +1,4 @@
-// TwardyPass UI build: 2026-08-24-fixed-compare-overflow
+// TwardyPass UI build: 2026-08-24-long-password-qvariant-fix
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
@@ -120,20 +120,51 @@ ApplicationWindow {
     }
 
     function panicClear() {
+        // Clear every sensitive input/output and reset all derived UI state.
+        // ScrollablePasswordField provides its own clear() method so the
+        // horizontal viewport is reset along with the password text.
         passwordInput.clear()
         contextInput.clear()
+        revealPassword.checked = false
         root.clearCompare()
+
         generatedValue = ""
         generatedEntropy = 0
+
         score = 0
         classification = "Waiting"
         scoreColor = textMuted
+        entropy = 0
+        passwordLength = 0
+        guessesLog10 = 0
         findings = []
         recommendations = []
+        dna = ({
+            "length": 0,
+            "unpredictability": 0,
+            "patternSafety": 0,
+            "characterMix": 0
+        })
+        attack = ({
+            "onlineThrottled": "—",
+            "onlineUnthrottled": "—",
+            "offlineSlow": "—",
+            "offlineFast": "—"
+        })
+
         breachState = "idle"
         breachMessage = "Not checked"
+        breachCount = 0
+
+        // Clearing the analyzer/context fires onTextChanged; stop the delayed
+        // analyzer so sensitive-derived values are not immediately repopulated.
+        analysisTimer.stop()
+
         bridge.clearSensitiveClipboard()
-        showToast("Sensitive data cleared", "Analyzer, comparison fields, generator output and matching clipboard content were cleared.")
+        showToast(
+            "Sensitive data cleared",
+            "Analyzer, comparison fields, generator output and matching clipboard content were cleared."
+        )
     }
 
     function showToast(title, message) {
@@ -144,7 +175,10 @@ ApplicationWindow {
     }
 
     Shortcut {
+        id: panicShortcut
         sequence: "Ctrl+Shift+X"
+        context: Qt.ApplicationShortcut
+        autoRepeat: false
         onActivated: root.panicClear()
     }
 
@@ -305,7 +339,7 @@ ApplicationWindow {
         property bool reveal: false
         property bool passwordMode: true
         property bool readOnly: false
-        property int maximumLength: 128
+        property int maximumLength: 8192
 
         implicitHeight: 58
         radius: 13
@@ -315,6 +349,11 @@ ApplicationWindow {
         clip: true
 
         Behavior on border.color { ColorAnimation { duration: 120 } }
+
+        function clear() {
+            input.text = ""
+            viewport.contentX = 0
+        }
 
         function ensureCursorVisible() {
             if (readOnly || viewport.width <= 0)
@@ -445,7 +484,7 @@ ApplicationWindow {
                 placeholderText: "Candidate " + candidate.candidateName
                 passwordMode: true
                 reveal: candidate.globalReveal || candidate.localReveal
-                maximumLength: 128
+                maximumLength: 8192
                 onTextChanged: {
                     candidate.result = ({})
                     candidate.analyzed = false
@@ -748,7 +787,7 @@ ApplicationWindow {
 
                     Panel {
                         Layout.fillWidth: true
-                        Layout.preferredHeight: 166
+                        Layout.preferredHeight: 206
                         gradient: Gradient {
                             GradientStop { position: 0; color: "#101B29" }
                             GradientStop { position: 1; color: "#0D1520" }
@@ -762,13 +801,29 @@ ApplicationWindow {
                                 Text { text: "ANALYZE A PASSWORD"; color: root.textMuted; font.pixelSize: 11; font.bold: true; font.letterSpacing: 1.2; Layout.fillWidth: true }
                                 Text { text: "100% local until you request a breach check"; color: root.textMuted; font.pixelSize: 11 }
                             }
-                            StyledField {
+                            ScrollablePasswordField {
                                 id: passwordInput
                                 Layout.fillWidth: true
+                                Layout.preferredHeight: 58
                                 placeholderText: "Enter a password to analyze"
-                                maximumLength: 128
-                                echoMode: revealPassword.checked ? TextInput.Normal : TextInput.Password
+                                maximumLength: 8192
+                                reveal: revealPassword.checked
+                                passwordMode: true
                                 onTextChanged: analysisTimer.restart()
+                            }
+                            RowLayout {
+                                Layout.fillWidth: true
+                                Text {
+                                    text: passwordInput.text.length + " / 8192 characters"
+                                    color: passwordInput.text.length >= 8192 ? root.warning : root.textMuted
+                                    font.pixelSize: 10
+                                }
+                                Item { Layout.fillWidth: true }
+                                Text {
+                                    text: passwordInput.text.length > 40 ? "Drag the bar under the password to review long input" : ""
+                                    color: root.textMuted
+                                    font.pixelSize: 10
+                                }
                             }
                             RowLayout {
                                 Layout.fillWidth: true

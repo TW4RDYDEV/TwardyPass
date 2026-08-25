@@ -5,6 +5,7 @@ TwardyPass is a privacy-first desktop password security workbench built with Pyt
 ## Current features
 
 - Real-time local password analysis
+- Long-password analysis up to 8,192 characters
 - 0–100 explanatory security score
 - zxcvbn pattern-aware guessing estimates
 - Security DNA indicators
@@ -41,44 +42,6 @@ pytest
 ## Important note
 
 Password-strength and crack-time estimates are educational risk indicators, not guarantees. Real attack cost depends on password uniqueness, service rate limits, hashing algorithms, hardware, credential reuse, and other factors.
-
-## Roadmap
-
-TwardyPass is actively being developed. The current release focuses on secure local password analysis, breach checking, password generation, comparison tools, and privacy-first desktop functionality.
-
-Planned improvements for upcoming versions include:
-
-* Windows standalone `.exe` release
-* Portable build for users who do not have Python installed
-* Improved installer and release packaging
-* Advanced password policy analysis
-* Expanded Security DNA visualization
-* Improved attack-resistance estimates
-* Enhanced breach intelligence
-* More generator presets
-* Stronger passphrase generation options
-* Exportable security reports
-* Additional privacy controls
-* UI animations and visual improvements
-* Extended automated testing
-* GitHub Actions CI/CD
-* Application screenshots and release documentation
-* Additional platform support where practical
-
-The goal is to continue evolving TwardyPass into a polished, privacy-focused password security workbench rather than a simple password strength checker.
-
-### Next Release
-
-The next planned release will focus primarily on:
-
-* standalone Windows executable
-* improved UI and animations
-* expanded password analysis
-* better reporting and visualization
-* additional generator and privacy features
-
-Development progress and new releases will be published through this repository.
-
 
 ## License
 

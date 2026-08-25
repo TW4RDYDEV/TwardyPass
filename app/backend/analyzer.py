@@ -32,6 +32,8 @@ COMMON_FRAGMENTS = {
     "123",
 }
 
+ZXCVBN_ANALYSIS_LIMIT = 128
+
 KEYBOARD_ROWS = (
     "qwertyuiop",
     "asdfghjkl",
@@ -154,7 +156,10 @@ def analyze_password(password: str, user_inputs: list[str] | None = None) -> dic
             "color": "#8D9AAA",
             "entropy": 0.0,
             "length": 0,
-            "guesses": 0,
+            # Keep guess counts as text because zxcvbn can return integers larger
+            # than Qt/QVariant's signed 64-bit integer range. Returning a Python
+            # big-int through a QVariantMap can make QML receive no result at all.
+            "guesses": "0",
             "guesses_log10": 0.0,
             "findings": [],
             "recommendations": ["Enter a password to begin the local security analysis."],
@@ -172,7 +177,22 @@ def analyze_password(password: str, user_inputs: list[str] | None = None) -> dic
             },
         }
 
-    zx = zxcvbn(password, user_inputs=user_inputs, max_length=128)
+    # zxcvbn becomes increasingly expensive on very long inputs and raises
+    # ValueError when the configured max_length is exceeded. TwardyPass still
+    # analyzes the complete password with its own structural checks and entropy
+    # calculations, while bounding the zxcvbn portion to a representative
+    # 128-character sample for responsiveness.
+    if len(password) <= ZXCVBN_ANALYSIS_LIMIT:
+        zx_password = password
+    else:
+        half = ZXCVBN_ANALYSIS_LIMIT // 2
+        zx_password = password[:half] + password[-half:]
+
+    zx = zxcvbn(
+        zx_password,
+        user_inputs=user_inputs,
+        max_length=ZXCVBN_ANALYSIS_LIMIT,
+    )
     length = len(password)
     lowered = password.lower()
     unique_ratio = len(set(password)) / max(1, length)
@@ -181,6 +201,18 @@ def analyze_password(password: str, user_inputs: list[str] | None = None) -> dic
 
     findings: list[Finding] = []
     penalties = 0
+
+    if length > ZXCVBN_ANALYSIS_LIMIT:
+        findings.append(
+            Finding(
+                "good",
+                "Extended-length analysis",
+                (
+                    f"All {length} characters were checked by TwardyPass. "
+                    "Pattern-estimation work is safely bounded for responsiveness."
+                ),
+            )
+        )
 
     if length < 8:
         findings.append(
@@ -363,7 +395,11 @@ def analyze_password(password: str, user_inputs: list[str] | None = None) -> dic
         "entropy": round(naive_entropy, 1),
         "length": length,
         "charset": charset,
-        "guesses": int(zx.get("guesses") or 0),
+        # zxcvbn guess counts routinely exceed 2^63 for strong passwords.
+        # PySide/QVariantMap cannot safely transport arbitrary-size Python ints,
+        # so preserve the exact value as a decimal string. QML uses
+        # guesses_log10 for visualization, so no precision or UI behavior is lost.
+        "guesses": str(zx.get("guesses") or 0),
         "guesses_log10": round(guesses_log10, 2),
         "findings": [item.to_dict() for item in findings],
         "recommendations": deduped_recommendations[:5],
