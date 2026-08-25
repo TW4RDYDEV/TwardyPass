@@ -2,6 +2,15 @@
 
 TwardyPass is a privacy-first desktop password security workbench built with Python, PySide6/QML, zxcvbn, and the Have I Been Pwned Pwned Passwords API.
 
+## Preview
+
+![TwardyPass](screenshots/1.png)
+![TwardyPass](screenshots/2.png)
+![TwardyPass](screenshots/3.png)
+![TwardyPass](screenshots/4.png)
+![TwardyPass](screenshots/5.png)
+![TwardyPass](screenshots/6.png)
+
 ## Current features
 
 - Real-time local password analysis
