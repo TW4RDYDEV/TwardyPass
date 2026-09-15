@@ -6,6 +6,9 @@ __pycache__/
 .ruff_cache/
 build/
 dist/
-*.spec
 .DS_Store
 .vscode/
+*.egg-info/
+.coverage
+.pytest-temp/
+

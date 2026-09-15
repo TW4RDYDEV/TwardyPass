@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" role="img" aria-labelledby="title desc">
+  <title id="title">TwardyPass app icon</title>
+  <desc id="desc">An angular white T and P on a black rounded square, outlined by a soft ice-blue metallic glow. Transparent outside the icon.</desc>
+  <defs>
+    <linearGradient id="face" x1="260" y1="80" x2="740" y2="944" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#101316"/>
+      <stop offset=".25" stop-color="#030405"/>
+      <stop offset=".6" stop-color="#000000"/>
+      <stop offset="1" stop-color="#070A0C"/>
+    </linearGradient>
+    <radialGradient id="sheen" cx="0" cy="0" r="1" gradientTransform="translate(490 66) rotate(90) scale(280 540)" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#718391" stop-opacity=".13"/>
+      <stop offset="1" stop-color="#718391" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="rim" x1="358" y1="80" x2="644" y2="944" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#E1EBF3"/>
+      <stop offset=".2" stop-color="#91A6B8"/>
+      <stop offset=".47" stop-color="#516A80"/>
+      <stop offset=".7" stop-color="#9BB6CA"/>
+      <stop offset="1" stop-color="#607C92"/>
+    </linearGradient>
+    <linearGradient id="bevel" x1="512" y1="83" x2="512" y2="941" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#CFDCE6" stop-opacity=".33"/>
+      <stop offset=".35" stop-color="#718697" stop-opacity=".08"/>
+      <stop offset=".72" stop-color="#8CA7BC" stop-opacity=".06"/>
+      <stop offset="1" stop-color="#ABC3D5" stop-opacity=".23"/>
+    </linearGradient>
+    <linearGradient id="monogram" x1="420" y1="282" x2="644" y2="722" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF"/>
+      <stop offset=".55" stop-color="#F8FAFC"/>
+      <stop offset="1" stop-color="#E9EFF4"/>
+    </linearGradient>
+    <filter id="halo" x="0" y="0" width="1024" height="1024" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="17"/>
+    </filter>
+    <filter id="edgeGlow" x="24" y="24" width="976" height="976" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="5"/>
+    </filter>
+    <filter id="markGlow" x="190" y="230" width="660" height="560" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="8"/>
+    </filter>
+    <g id="mark">
+      <path d="M260 292H514L594 372H436V650L356 730V372H260V292Z"/>
+      <path d="M546 292H650L762 404V512L650 624H562V650L482 730V394L562 474V544H616L682 478V438L616 372L546 292Z"/>
+    </g>
+  </defs>
+  <rect x="80" y="80" width="864" height="864" rx="194" stroke="#8BB8DB" stroke-width="7" opacity=".36" filter="url(#halo)"/>
+  <rect x="80" y="80" width="864" height="864" rx="194" stroke="#B0D0E8" stroke-width="3" opacity=".65" filter="url(#edgeGlow)"/>
+  <rect x="80" y="80" width="864" height="864" rx="194" fill="url(#face)"/>
+  <rect x="80" y="80" width="864" height="864" rx="194" fill="url(#sheen)"/>
+  <rect x="85" y="85" width="854" height="854" rx="189" stroke="url(#bevel)" stroke-width="8"/>
+  <rect x="80" y="80" width="864" height="864" rx="194" stroke="url(#rim)" stroke-width="2.5"/>
+  <g transform="translate(0 0)">
+    <use href="#mark" fill="#EEF5FF" opacity=".12" filter="url(#markGlow)"/>
+    <use href="#mark" fill="url(#monogram)"/>
+  </g>
+</svg>
+
+

@@ -1,3 +1,5 @@
+"""Original regression fixtures use synthetic passwords, never real account credentials."""
+
 from app.backend.analyzer import analyze_password
 
 
@@ -54,4 +56,3 @@ def test_very_long_randomish_password_keeps_analyzing():
     assert result["classification"] != "Waiting"
     assert isinstance(result["guesses"], str)
     assert 0 <= result["score"] <= 100
-

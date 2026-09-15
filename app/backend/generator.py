@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import math
-import random
 import secrets
 import string
 
@@ -79,67 +78,92 @@ NOUNS = [
 ]
 
 
-def _filter_chars(chars: str, exclude_ambiguous: bool) -> str:
-    if not exclude_ambiguous:
-        return chars
-    return "".join(ch for ch in chars if ch not in AMBIGUOUS)
+PRESETS = {
+    "BALANCED": dict(
+        length=20, uppercase=True, lowercase=True, digits=True, symbols=True, exclude_ambiguous=True
+    ),
+    "MAXIMUM SECURITY": dict(
+        length=64, uppercase=True, lowercase=True, digits=True, symbols=True, exclude_ambiguous=False
+    ),
+    "WEBSITE COMPATIBLE": dict(
+        length=24, uppercase=True, lowercase=True, digits=True, symbols=False, exclude_ambiguous=True
+    ),
+    "EASY TO TYPE": dict(
+        length=24, uppercase=False, lowercase=True, digits=True, symbols=False, exclude_ambiguous=True
+    ),
+}
 
 
 def generate_password(
-    length: int = 20,
-    uppercase: bool = True,
-    lowercase: bool = True,
-    digits: bool = True,
-    symbols: bool = True,
-    exclude_ambiguous: bool = True,
-) -> dict[str, object]:
+    length=20, uppercase=True, lowercase=True, digits=True, symbols=True, exclude_ambiguous=True, excluded=""
+) -> dict:
     length = max(4, min(128, int(length)))
-
-    groups: list[str] = []
-    if lowercase:
-        groups.append(_filter_chars(string.ascii_lowercase, exclude_ambiguous))
-    if uppercase:
-        groups.append(_filter_chars(string.ascii_uppercase, exclude_ambiguous))
-    if digits:
-        groups.append(_filter_chars(string.digits, exclude_ambiguous))
-    if symbols:
-        groups.append(_filter_chars(SYMBOLS, exclude_ambiguous))
-
-    groups = [group for group in groups if group]
+    banned = set(excluded) | (AMBIGUOUS if exclude_ambiguous else set())
+    groups = []
+    for enabled, chars in (
+        (lowercase, string.ascii_lowercase),
+        (uppercase, string.ascii_uppercase),
+        (digits, string.digits),
+        (symbols, SYMBOLS),
+    ):
+        if enabled:
+            group = "".join(ch for ch in chars if ch not in banned)
+            if not group:
+                raise ValueError("Excluded characters remove an entire selected category.")
+            groups.append(group)
     if not groups:
-        groups = [_filter_chars(string.ascii_letters + string.digits, exclude_ambiguous)]
-
-    if length < len(groups):
-        length = len(groups)
-
+        raise ValueError("Select at least one character category.")
     pool = "".join(groups)
-    password_chars = [secrets.choice(group) for group in groups]
-    password_chars.extend(secrets.choice(pool) for _ in range(length - len(password_chars)))
-    random.SystemRandom().shuffle(password_chars)
-    password = "".join(password_chars)
-
-    entropy = length * math.log2(len(set(pool))) if len(set(pool)) > 1 else 0.0
+    # Exact uniform sampling from strings containing every requested category.
+    # Dynamic programming avoids unbounded rejection when exclusions leave tiny groups.
+    full = (1 << len(groups)) - 1
+    ways = [[int(mask == full) for mask in range(full + 1)]]
+    for _ in range(length):
+        ways.append(
+            [
+                sum(len(group) * ways[-1][mask | (1 << i)] for i, group in enumerate(groups))
+                for mask in range(full + 1)
+            ]
+        )
+    mask = 0
+    chars = []
+    for remaining in range(length, 0, -1):
+        ticket = secrets.randbelow(ways[remaining][mask])
+        for i, group in enumerate(groups):
+            weight = len(group) * ways[remaining - 1][mask | (1 << i)]
+            if ticket < weight:
+                chars.append(secrets.choice(group))
+                mask |= 1 << i
+                break
+            ticket -= weight
     return {
-        "password": password,
-        "entropy": round(entropy, 1),
-        "poolSize": len(set(pool)),
+        "password": "".join(chars),
+        "entropy": round(math.log2(ways[length][0]), 1),
+        "poolSize": len(pool),
         "length": length,
     }
 
 
-def generate_passphrase(words: int = 6, separator: str = "-") -> dict[str, object]:
+# Deduplicate actual output tokens, rather than assuming every pair is distinct.
+TOKENS = sorted({a + n for a in ADJECTIVES for n in NOUNS})
+
+
+def generate_passphrase(words=6, separator="-", capitalization="lower", number=False, symbol=False) -> dict:
     words = max(4, min(12, int(words)))
-    separators = {"-", ".", "_", " ", "/"}
-    separator = separator if separator in separators else "-"
-
-    # 32 × 32 = 1,024 possible adjective+noun compounds per token.
-    tokens = [f"{secrets.choice(ADJECTIVES)}{secrets.choice(NOUNS)}" for _ in range(words)]
+    separator = separator if separator in {"-", ".", "_", " ", "/"} else "-"
+    tokens = [secrets.choice(TOKENS) for _ in range(words)]
+    if capitalization == "title":
+        tokens = [token.title() for token in tokens]
+    elif capitalization == "upper":
+        tokens = [token.upper() for token in tokens]
+    elif capitalization != "lower":
+        raise ValueError("Unknown capitalization option.")
     phrase = separator.join(tokens)
-    entropy = words * math.log2(len(ADJECTIVES) * len(NOUNS))
-
-    return {
-        "password": phrase,
-        "entropy": round(entropy, 1),
-        "words": words,
-        "separator": separator,
-    }
+    entropy = words * math.log2(len(TOKENS))
+    if number:
+        phrase += str(secrets.randbelow(100)).zfill(2)
+        entropy += math.log2(100)
+    if symbol:
+        phrase += secrets.choice(SYMBOLS)
+        entropy += math.log2(len(SYMBOLS))
+    return {"password": phrase, "entropy": round(entropy, 1), "words": words, "separator": separator}

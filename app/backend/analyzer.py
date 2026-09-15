@@ -32,6 +32,24 @@ COMMON_FRAGMENTS = {
     "123",
 }
 
+FINDING_TYPES = {
+    "Very short password": "short",
+    "Limited length": "short",
+    "Excellent length": "length",
+    "Sequential characters": "sequence",
+    "Keyboard pattern": "keyboard",
+    "Repeated characters": "repeat",
+    "Repeated block": "repeat",
+    "Common password language": "common_word",
+    "Predictable year": "year",
+    "Personal information detected": "personal",
+    "Low character variety": "variety",
+    "Extended-length analysis": "extended",
+    "Dictionary pattern": "dictionary",
+    "Common suffix": "suffix",
+    "No obvious structural weakness": "structural",
+}
+
 ZXCVBN_ANALYSIS_LIMIT = 128
 
 KEYBOARD_ROWS = (
@@ -53,6 +71,7 @@ class Finding:
             "severity": self.severity,
             "title": self.title,
             "detail": self.detail,
+            "type": FINDING_TYPES.get(self.title, "structural"),
         }
 
 
@@ -147,6 +166,7 @@ def _time_label(value: Any) -> str:
 
 
 def analyze_password(password: str, user_inputs: list[str] | None = None) -> dict[str, Any]:
+    password = password[:8192]
     user_inputs = [item.strip() for item in (user_inputs or []) if item and item.strip()]
 
     if not password:
@@ -168,6 +188,7 @@ def analyze_password(password: str, user_inputs: list[str] | None = None) -> dic
                 "unpredictability": 0,
                 "patternSafety": 0,
                 "characterMix": 0,
+                "breachSafety": None,
             },
             "attack": {
                 "onlineThrottled": "—",
@@ -285,7 +306,7 @@ def analyze_password(password: str, user_inputs: list[str] | None = None) -> dic
             Finding(
                 "danger",
                 "Common password language",
-                f"Predictable fragment detected: {', '.join(common_hits[:3])}.",
+                "Common password fragments were detected. Their contents remain private.",
             )
         )
         penalties += min(24, 8 + 5 * len(common_hits))
@@ -296,10 +317,17 @@ def analyze_password(password: str, user_inputs: list[str] | None = None) -> dic
             Finding(
                 "warning",
                 "Predictable year",
-                f"The year {year_match.group(0)} may be easy for an attacker to guess.",
+                "A predictable year was detected. Its contents remain private.",
             )
         )
         penalties += 7
+
+    if any(match.get("pattern") == "dictionary" for match in zx.get("sequence", [])):
+        findings.append(
+            Finding("warning", "Dictionary pattern", "A dictionary-derived pattern was detected.")
+        )
+    if re.search(r"(?:123|1234|[!@#$]{1,3})$", password):
+        findings.append(Finding("warning", "Common suffix", "A predictable ending was detected."))
 
     if user_inputs:
         personal_hits = [item for item in user_inputs if len(item) >= 3 and item.lower() in lowered]
@@ -408,6 +436,7 @@ def analyze_password(password: str, user_inputs: list[str] | None = None) -> dic
             "unpredictability": unpredictability,
             "patternSafety": pattern_safety,
             "characterMix": character_mix,
+            "breachSafety": None,
         },
         "attack": {
             "onlineThrottled": _time_label(crack.get("online_throttling_100_per_hour")),
